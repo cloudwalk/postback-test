@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Simple postback test playground.">
+    <meta name="author" content="CloudWalk, Inc.">
+
+    <title>CloudWalk Postback</title>
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github-gist.min.css" rel="stylesheet">
+
+    <style>
+      body {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+      .jumbotron {
+        padding-top: 10px;
+        padding-bottom: 35px;
+      }
+      .jumbotron .lead {
+        padding-top: 20px;
+      }
+      .jumbotron pre {
+        margin: 25px 0 -20px 0;
+      }
+      table pre {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -pre-wrap;
+        white-space: -o-pre-wrap;
+        word-wrap: break-word;
+      }
+      .header,
+      .footer {
+        padding-right: 1rem;
+        padding-left: 1rem;
+      }
+      .header {
+        padding-bottom: 1rem;
+        border-bottom: .05rem solid #e5e5e5;
+      }
+      .header h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 3rem;
+      }
+      .footer {
+        padding-top: 1.5rem;
+        color: #777;
+        border-top: .05rem solid #e5e5e5;
+      }
+      @media (min-width: 48em) {
+        .container {
+          max-width: 46rem;
+        }
+      }
+      .container-narrow > hr {
+        margin: 2rem 0;
+      }
+      .jumbotron {
+        text-align: center;
+        border-bottom: .05rem solid #e5e5e5;
+      }
+      .jumbotron .btn {
+        padding: .75rem 1.5rem;
+        font-size: 1.5rem;
+      }
+      @media screen and (min-width: 48em) {
+        .header,
+        .footer {
+          padding-right: 0;
+          padding-left: 0;
+        }
+        .header {
+          margin-bottom: 2rem;
+        }
+        .jumbotron {
+          border-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills float-right">
+            <li class="nav-item">
+              <form action="/reset" method="post">
+                <input type="submit" value="Reset Payloads" class="btn btn-outline-danger">
+              </form>
+            </li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">Postback test</h3>
+      </header>
+
+      <main role="main">
+        <div class="jumbotron">
+          <small>This is a public (and volatile) playground. Do not post sensitive information here.</small>
+          <p class="lead">Post something to <code>https://postback-test.herokuapp.com</code> and check the content here</p>
+          <small><pre>curl -X POST "https://postback-test.herokuapp.com" -d '{"foo": "bar"}'</pre></small>
+        </div>
+
+        <table id="transactions" class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Payload</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @keys.each do |key| %>
+              <tr>
+                <td scope="row"><%= key %></td>
+                <td><pre><code class="json"><%= prettify($redis.get(key)) %></code></pre></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </main>
+
+      <footer class="footer">
+        <p>&copy; CloudWalk, Inc.</p>
+      </footer>
+    </div>
+
+    <script src="//js.pusher.com/4.1/pusher.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/json.min.js"></script>
+
+    <script type="text/javascript">
+      hljs.initHighlightingOnLoad();
+
+      var pusher  = new Pusher('a5f5af0ca84413171712');
+      var channel = pusher.subscribe('transactions');
+
+      channel.bind('log', function(data) {
+        appendContent(data);
+      });
+
+      function appendContent(data) {
+        var table = document.getElementById('transactions');
+        var row = table.getElementsByTagName('tbody')[0].insertRow(0);
+        var cellId = row.insertCell(0);
+        var cellPayload = row.insertCell(1);
+
+        cellId.innerHTML = data.id
+        cellPayload.innerHTML = preFormattedPayload(data.payload);
+
+        hljs.highlightBlock(cellPayload);
+        cellPayload.classList.remove('hljs');
+      }
+
+      function preFormattedPayload(str) {
+        try {
+          var payload = JSON.stringify(JSON.parse(str), null, 2);
+          return '<pre><code class="json">' + payload + '</code></pre>';
+        }
+        catch(err) {
+          console.log('Stringify error:\n' + str + '\n' + err.message);
+          return '<pre>' + str + '</pre>';
+        }
+      }
+    </script>
+  </body>
+</html>
