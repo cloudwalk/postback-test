@@ -140,6 +140,7 @@
       var channel = pusher.subscribe('transactions');
 
       channel.bind('log', function(data) {
+        console.log(data.payload);
         appendContent(data);
       });
 
