@@ -16,10 +16,12 @@ get '/' do
 end
 
 post '/' do
+  content_type 'application/json'
+
   # Delete records once 50 postbacks are stored
   $redis.flushall if $redis.get('request_count').to_i >= 50
 
-  payload = params['transaction'].to_json
+  payload = request.body.read
   counter = $redis.incr('request_count')
 
   # Store the record on Redis
