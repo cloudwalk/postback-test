@@ -10,5 +10,5 @@ Simple postback test playground.
 ### Example
 
 ```
-curl -X POST "https://postback-test.herokuapp.com" -d '{"foo": "bar"}'
+curl -X POST "https://postback-test.herokuapp.com" -d "transaction[foo]=bar"
 ```

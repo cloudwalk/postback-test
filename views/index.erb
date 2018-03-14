@@ -103,7 +103,7 @@
         <div class="jumbotron">
           <small>This is a public (and volatile) playground. Do not post sensitive information here.</small>
           <p class="lead">Post something to <code>https://postback-test.herokuapp.com</code> and check the content here</p>
-          <small><pre>curl -X POST "https://postback-test.herokuapp.com" -d '{"foo": "bar"}'</pre></small>
+          <small><pre>curl -X POST "https://postback-test.herokuapp.com" -d "transaction[foo]=bar"</pre></small>
         </div>
 
         <table id="transactions" class="table">
