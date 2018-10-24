@@ -12,3 +12,7 @@ Simple postback test playground.
 ```
 curl -X POST "https://postback-test.herokuapp.com" -d '{"foo":"bar"}'
 ```
+
+## License
+
+This project is released under the [MIT License](https://opensource.org/licenses/MIT).
